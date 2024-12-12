@@ -47,6 +47,15 @@ public struct _PostgresPreparedStatementString: ExpressibleByStringInterpolation
             bind: String,
             _ type: (some PostgresDynamicTypeEncodable).Type
         ) {}
+
+        /// Adds an optional bind variable.
+        /// - Parameters:
+        ///   - bind: The name of the bind variable in Swift.
+        ///   - type: The Swift type of the bind variable.
+        public mutating func appendInterpolation(
+            bind: String,
+            _ type: Optional<some PostgresDynamicTypeEncodable>.Type
+        ) {}
     }
 }
 

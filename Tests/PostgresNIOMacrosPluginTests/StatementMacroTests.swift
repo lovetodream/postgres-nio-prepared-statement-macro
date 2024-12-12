@@ -296,7 +296,11 @@ final class StatementMacroTests: XCTestCase {
                 
                     func makeBindings() throws -> PostgresBindings {
                         var bindings = PostgresBindings(capacity: 1)
-                        bindings.append(age)
+                        if let age {
+                            bindings.append(age)
+                        } else {
+                            bindings.appendNull()
+                        }
                         return bindings
                     }
                 
@@ -337,7 +341,11 @@ final class StatementMacroTests: XCTestCase {
                 
                     func makeBindings() throws -> PostgresBindings {
                         var bindings = PostgresBindings(capacity: 1)
-                        bindings.append(age)
+                        if let age {
+                            bindings.append(age)
+                        } else {
+                            bindings.appendNull()
+                        }
                         return bindings
                     }
                 

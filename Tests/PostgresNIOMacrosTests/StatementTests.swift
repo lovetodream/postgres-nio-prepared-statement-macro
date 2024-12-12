@@ -53,6 +53,13 @@ final class StatementTests {
                 stream3Count += 1
             }
             #expect(stream3Count == 1)
+            let stream4 = try await connection.execute(SimpleSelectWithOptionalWhereClause(minCount: nil), logger: logger)
+            var stream4Count = 0
+            for try await row in stream4 {
+                #expect(row.count == nil)
+                stream4Count += 1
+            }
+            #expect(stream4Count == 0)
         }
     }
 }
@@ -64,7 +71,10 @@ private struct SimpleNumberSelect {}
 private struct SimpleNumberSelectWithWhereClause {}
 
 @Statement("SELECT \("NULL", Int?.self, as: "count")")
-struct SimpleNullSelect {}
+private struct SimpleNullSelect {}
+
+@Statement("SELECT \("1", Int.self, as: "count") WHERE \(bind: "minCount", Int?.self) != 0")
+private struct SimpleSelectWithOptionalWhereClause {}
 
 func env(_ name: String) -> String? {
     getenv(name).flatMap { String(cString: $0) }
