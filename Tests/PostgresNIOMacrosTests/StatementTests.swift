@@ -59,7 +59,7 @@ final class StatementTests {
                 #expect(row.count == nil)
                 stream4Count += 1
             }
-            #expect(stream4Count == 1)
+            #expect(stream4Count == 0)
         }
     }
 }
@@ -73,7 +73,7 @@ private struct SimpleNumberSelectWithWhereClause {}
 @Statement("SELECT \("NULL", Int?.self, as: "count")")
 private struct SimpleNullSelect {}
 
-@Statement("SELECT \("1", Int.self, as: "count") WHERE \(bind: "minCount", Int?.self) IS NULL")
+@Statement("SELECT \("1", Int.self, as: "count") WHERE \(bind: "minCount", Int?.self) != 0")
 private struct SimpleSelectWithOptionalWhereClause {}
 
 func env(_ name: String) -> String? {
