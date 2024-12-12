@@ -294,24 +294,60 @@ public struct StatementMacro: ExtensionMacro, MemberMacro {
                         )
                     ))
                 )
-                for (bind, _, _) in binds {
-                    CodeBlockItemSyntax(item: .expr(ExprSyntax(
-                        FunctionCallExprSyntax(
-                            calledExpression: MemberAccessExprSyntax(
-                                base: DeclReferenceExprSyntax(baseName: .identifier("bindings")),
-                                declName: DeclReferenceExprSyntax(baseName: .identifier("append"))
-                            ),
-                            leftParen: .leftParenToken(),
-                            arguments: [LabeledExprSyntax(label: nil, expression: DeclReferenceExprSyntax(baseName: .identifier(bind)))],
-                            rightParen: .rightParenToken()
-                        )
-                    )))
+                for (bind, _, isOptional) in binds {
+                    appendBind(bind, isOptional: isOptional)
                 }
                 CodeBlockItemSyntax(item: .stmt(StmtSyntax(ReturnStmtSyntax(
                     expression: DeclReferenceExprSyntax(baseName: .identifier("bindings"))
                 ))))
             })
         )
+    }
+
+    private static func appendBind(_ name: String, isOptional: Bool) -> CodeBlockItemSyntax {
+        if isOptional {
+            CodeBlockItemSyntax(item: .expr(ExprSyntax(
+                IfExprSyntax(
+                    conditions: [
+                        ConditionElementSyntax(condition: .optionalBinding(OptionalBindingConditionSyntax(
+                            bindingSpecifier: .keyword(.let),
+                            pattern: IdentifierPatternSyntax(identifier: .identifier(name))
+                        )))
+                    ],
+                    body: CodeBlockSyntax(statements: [appendBind(name, isOptional: false)]),
+                    elseKeyword: .keyword(.else),
+                    elseBody: IfExprSyntax.ElseBody(
+                        CodeBlockSyntax(
+                            leftBrace: .leftBraceToken(),
+                            statements: [CodeBlockItemSyntax(item: .expr(
+                                ExprSyntax(FunctionCallExprSyntax(
+                                    calledExpression: MemberAccessExprSyntax(
+                                        base: DeclReferenceExprSyntax(baseName: .identifier("bindings")),
+                                        declName: DeclReferenceExprSyntax(baseName: .identifier("appendNull"))
+                                    ),
+                                    leftParen: .leftParenToken(),
+                                    arguments: [],
+                                    rightParen: .rightParenToken()
+                                ))
+                            ))],
+                            rightBrace: .rightBraceToken()
+                        )
+                    )
+                )
+            )))
+        } else {
+            CodeBlockItemSyntax(item: .expr(ExprSyntax(
+                FunctionCallExprSyntax(
+                    calledExpression: MemberAccessExprSyntax(
+                        base: DeclReferenceExprSyntax(baseName: .identifier("bindings")),
+                        declName: DeclReferenceExprSyntax(baseName: .identifier("append"))
+                    ),
+                    leftParen: .leftParenToken(),
+                    arguments: [LabeledExprSyntax(label: nil, expression: DeclReferenceExprSyntax(baseName: .identifier(name)))],
+                    rightParen: .rightParenToken()
+                )
+            )))
+        }
     }
 
     private static func makeEmptyBindings() -> FunctionDeclSyntax {
